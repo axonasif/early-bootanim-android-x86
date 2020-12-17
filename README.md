@@ -49,7 +49,7 @@ RUSTFLAGS='-C link-arg=-s' cargo build --release --target i686-unknown-linux-mus
 
 * Put your png frames at `anim` dir.
 
-* While being in the `fbspinner` dir run the following command:
+* While being in the `early-bootanim` dir run the following command:
 ```
 python3 scripts/flatten.py
 ```
@@ -58,3 +58,9 @@ python3 scripts/flatten.py
 ----
 
 This project is still **WIP**
+
+
+# Licence
+---------
+
+This project is licenced under **GPL-3.0 License**
