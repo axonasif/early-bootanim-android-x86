@@ -1,0 +1,17 @@
+[package]
+name = "early-bootanim-android-x86"
+version = "0.1.0"
+authors = ["Mathias Rav <m@git.strova.dk>", "AXON <aminurfisa3@gmail.com>"]
+description = "Render a bootanim at initrd.img early boot stage for android-x86"
+license = "GPL-2.0-or-later"
+edition = "2018"
+
+[dependencies]
+flate2 = "1.0.19"
+libc = "0.2.81"
+framebuffer = "0.2.2"
+termion = "1.5.5"
+ctrlc = "3.1.7"
+
+[profile.release]
+panic = "abort"
