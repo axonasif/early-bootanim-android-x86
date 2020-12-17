@@ -33,7 +33,7 @@ RUSTFLAGS='-C link-arg=-s' cargo build --release --target x86_64-unknown-linux-m
 RUSTFLAGS='-C link-arg=-s' cargo build --release --target i686-unknown-linux-musl    # For 32bit
 ```
 
-> Then you should find the output as `target/x86_64-unknown-linux-musl/release/rusty-magisk` (64bit)
+> Then you should find the output as `target/x86_64-unknown-linux-musl/release/early-bootanim` (64bit)
 
 
 ***more todo stuff .....***

@@ -87,7 +87,7 @@ fn main() {
     ctrlc::set_handler(move || {
         println!("{}{}", termion::clear::All, termion::cursor::Show);
         println!("Received Ctrl+C!");
-        std::process::exit(1);
+        process::exit(1);
     })
     .expect("Error setting Ctrl-C handler");
 
