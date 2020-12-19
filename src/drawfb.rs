@@ -1,9 +1,12 @@
 //! Simple Linux framebuffer abstraction.
 
 pub use framebuffer::Framebuffer;
-use std::io::{self, Seek, Write};
-use std::thread;
-use std::time;
+use std::{
+    io::{self, Seek, Write},
+    path::Path,
+    thread, time,
+};
+use sysinfo::{ProcessExt, System, SystemExt};
 
 pub trait FramebufferExt {
     fn writer(&mut self, width: usize, height: usize) -> FbWriter;
@@ -41,8 +44,10 @@ impl FramebufferExt for Framebuffer {
     {
         let mut writer = self.writer(width, height);
         let dur = time::Duration::from_millis(1000 / 30);
+        /*
         println!("{}", termion::cursor::Hide);
         println!("{}", termion::clear::All);
+        */
         loop {
             let next = time::Instant::now() + dur;
             match render_frame(&mut writer) {
@@ -52,6 +57,16 @@ impl FramebufferExt for Framebuffer {
             let now = time::Instant::now();
             if now < next {
                 thread::sleep(next - now);
+            }
+
+            // Exit on existence of android bootanimation
+            if !Path::new("/android").exists() {
+                for (_pid, process) in System::new_all().get_processes() {
+                    if process.name() == "bootanimation" {
+                        thread::sleep(time::Duration::from_secs(5));
+                        std::process::exit(0);
+                    }
+                }
             }
         }
     }

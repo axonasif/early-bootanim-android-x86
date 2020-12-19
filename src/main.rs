@@ -1,8 +1,8 @@
 mod drawfb;
 use drawfb::{Framebuffer, FramebufferExt};
 use flate2::read::ZlibDecoder;
-use std::io::Read;
-use std::{fmt, io, process, result};
+use likemod::errors;
+use std::{fmt, fs, io, io::Read, path::Path, process, result};
 
 #[derive(Debug)]
 pub enum ErrorKind {
@@ -82,7 +82,21 @@ macro_rules! unwrap_or_exit {
     };
 }
 
+fn load_modfile(modpath: &str) -> errors::Result<()> {
+    // Get a file descriptor to the kernel module object.
+    let fmod = std::fs::File::open(Path::new(modpath))?;
+
+    // Assemble module parameters for loading.
+    let mut params = likemod::ModParams::new();
+    params.insert("bus_delay".to_string(), likemod::ModParamValue::Int(5));
+
+    // Try to load the module.
+    let loader = likemod::ModLoader::default().set_parameters(params);
+    loader.load_module_file(&fmod)
+}
+
 fn main() {
+    /*
     // Handle ctrl + c signal
     ctrlc::set_handler(move || {
         println!("{}{}", termion::clear::All, termion::cursor::Show);
@@ -90,6 +104,39 @@ fn main() {
         process::exit(1);
     })
     .expect("Error setting Ctrl-C handler");
+    */
+
+    if !Path::new("/android").exists() {
+        loop {
+            if Path::new("/sys/module/drm_kms_helper").exists() {
+                // Load overlay kernel modules
+                let mut kernel_release = match fs::read_to_string("/proc/sys/kernel/osrelease") {
+                    Ok(ok_result) => ok_result,
+                    Err(_) => {
+                        process::exit(1);
+                    }
+                };
+
+                kernel_release.pop(); // Remove newline char
+
+                for module in ["connector/cn.ko", "video/fbdev/uvesafb.ko"].iter() {
+                    let mod_path = format!(
+                        "/system/lib/modules/{}/kernel/drivers/{}",
+                        kernel_release, module
+                    );
+                    match load_modfile(&mod_path) {
+                        Ok(_) => {}
+                        Err(_) => {
+                            println!("rusty-magisk: Failed to load overlay kernel modules");
+                            process::exit(1);
+                        }
+                    }
+                }
+
+                break;
+            }
+        }
+    }
 
     let animdata: &'static [u8] = include_bytes!("anim.bin");
 
@@ -98,13 +145,27 @@ fn main() {
         "anim.bin is in the wrong format ({})"
     );
 
-    let mut fb = unwrap_or_exit!(Framebuffer::new("/dev/fb0"), "Could not open /dev/fb0 ({})");
+    let fb_dev = {
+        if Path::new("/dev/fb0").exists() {
+            "/dev/fb0"
+        } else {
+            "/dev/graphics/fb0"
+        }
+    };
+
+    let mut fb = unwrap_or_exit!(
+        Framebuffer::new(fb_dev),
+        "Could not open framebuffer device ({})"
+    );
 
     let mut i = 0;
     fb.write_loop(width, height, |writer| {
-        writer
-            .write(&frames[i * frame_size..(i + 1) * frame_size])
-            .unwrap();
+        match writer.write(&frames[i * frame_size..(i + 1) * frame_size]) {
+            Ok(_) => {}
+            Err(_) => {
+                process::exit(1);
+            }
+        }
         i += 1;
         if i == nframes {
             i = 0;

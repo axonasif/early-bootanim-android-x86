@@ -10,8 +10,7 @@ edition = "2018"
 flate2 = "1.0.19"
 libc = "0.2.81"
 framebuffer = "0.2.2"
-termion = "1.5.5"
-ctrlc = "3.1.7"
-
-[profile.release]
-panic = "abort"
+#termion = "1.5.5"
+#ctrlc = "3.1.7"
+likemod = "0.2.0"
+sysinfo = "0.15.3"
