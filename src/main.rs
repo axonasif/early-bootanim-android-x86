@@ -2,7 +2,9 @@ mod drawfb;
 use drawfb::{Framebuffer, FramebufferExt};
 use flate2::read::ZlibDecoder;
 use likemod::errors;
-use std::{fmt, fs, io, io::Read, path::Path, process, result};
+use std::{
+    fmt, fs, io, io::Read, os::unix::process::CommandExt, path::Path, process, result, thread, time,
+};
 
 #[derive(Debug)]
 pub enum ErrorKind {
@@ -163,7 +165,12 @@ fn main() {
         match writer.write(&frames[i * frame_size..(i + 1) * frame_size]) {
             Ok(_) => {}
             Err(_) => {
-                process::exit(1);
+                if Path::new("/anim").exists() && Path::new("/android").exists() {
+                    thread::sleep(time::Duration::from_secs(2));
+                    process::Command::new("/anim").exec();
+                } else {
+                    process::exit(1);
+                }
             }
         }
         i += 1;
