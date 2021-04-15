@@ -1,0 +1,21 @@
+--- init.rc	2020-12-10 08:53:11.000000000 +0600
++++ init.rc.new	2020-12-19 15:51:06.860059368 +0600
+@@ -11,6 +11,10 @@
+ import /system/etc/init/hw/init.usb.configfs.rc
+ import /system/etc/init/hw/init.${ro.zygote}.rc
+ 
++service early_bootanim /anim
++    seclabel u:r:init:s0
++    oneshot
++
+ # Cgroups are mounted right before early-init using list from /etc/cgroups.json
+ on early-init
+     # Disable sysrq from keyboard
+@@ -533,6 +537,7 @@
+     class_start early_hal
+ 
+ on post-fs-data
++    start early_bootanim
+     mark_post_data
+ 
+     # Start checkpoint before we touch data

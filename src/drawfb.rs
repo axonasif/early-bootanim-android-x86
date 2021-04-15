@@ -216,7 +216,7 @@ pub fn playanim() {
                     );
                     if let Err(_) = load_modfile(&mod_path) {
                         {
-                            println!("rusty-magisk: Failed to load overlay kernel modules");
+                            println!("early-bootanim: Failed to load overlay kernel modules");
                             process::exit(1);
                         }
                     }
