@@ -122,16 +122,16 @@ impl FramebufferExt for Framebuffer {
     {
         // Exit on existence of android bootanimation
         let _handle_one = thread::spawn(|| loop {
-            if !path::Path::new("/android").exists() {
+//             if !path::Path::new("/android").exists() {
                 for (_pid, process) in System::new_all().get_processes() {
-                    if process.name() == "bootanimation" {
-                        thread::sleep(time::Duration::from_secs(15));
+                    if process.name() == "bootanimation" || process.name() == "gearinit" {
+                        thread::sleep(time::Duration::from_secs(6));
                         std::process::exit(0);
                     }
                 }
-            } else {
-                break;
-            }
+//             } else {
+//                 break;
+//             }
         });
 
         let mut writer = self.writer(width, height);
@@ -186,16 +186,6 @@ fn load_modfile(modpath: &str) -> errors::Result<()> {
 }
 
 pub fn playanim() {
-    /*
-    // Handle ctrl + c signal
-    ctrlc::set_handler(move || {
-        println!("{}{}", termion::clear::All, termion::cursor::Show);
-        println!("Received Ctrl+C!");
-        process::exit(1);
-    })
-    .expect("Error setting Ctrl-C handler");
-    */
-
     if !path::Path::new("/android").exists() {
         loop {
             if path::Path::new("/sys/module/drm_kms_helper").exists() {
